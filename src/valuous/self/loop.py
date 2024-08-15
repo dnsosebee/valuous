@@ -3,33 +3,43 @@ from time import sleep
 
 from valuous.peripherals.cli import cli
 from valuous.peripherals.openai import openAI
+from valuous.self.procedure import procedure
+from valuous.self.sync_git import git_process
 
 # from valuous.self.db import db
 
-if cli.get_num_messages() > 0:
-    user_input = cli.poll()
 
-    system_message = {
-        "role": "system",
-        "content": "You are Valuous."
-    }
+@procedure
+def loop():
 
-    user_message = {
-        "role": "user",
-        "content": user_input[0][0]
-    }
+    # GIT IO
+    git_process()
 
-    messages = [system_message, user_message]
-    model = "gpt-4o-mini"
+    # CLI IO
+    if cli.get_num_messages() > 0:
+        user_input = cli.poll()
 
-    chat_completion = openAI.chat.completions.create(
-        messages=messages, model=model)
+        system_message = {
+            "role": "system",
+            "content": "You are Valuous."
+        }
 
-    chat_response = chat_completion.choices[0].message
+        user_message = {
+            "role": "user",
+            "content": user_input[0][0]
+        }
 
-    print(chat_response)
-else:
-    sleep(1)
+        messages = [system_message, user_message]
+        model = "gpt-4o-mini"
+
+        chat_completion = openAI.chat.completions.create(
+            messages=messages, model=model)
+
+        chat_response = chat_completion.choices[0].message
+
+        print(chat_response)
+    else:
+        sleep(1)
 
 
 # res = db.run("""
