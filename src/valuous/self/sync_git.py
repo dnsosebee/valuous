@@ -38,3 +38,5 @@ def git_process():
         push_changes()
     else:
         print("Conflicts detected. Manual resolution needed.")
+
+# Adding a comment
