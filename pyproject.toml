@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "valuous"
+version = "0.1.0"
+description = ""
+authors = ["Daniel Sosebee <dnsosebee@gmail.com>"]
+readme = "README.md"
+packages = [
+    { include = "valuous", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+pydantic = {extras = ["dotenv"], version = "^2.7.4"}
+pydantic-settings = "^2.3.3"
+openai = "^1.37.0"
+pycozo = {extras = ["embedded", "pandas", "requests"], version = "^0.7.6"}
+
+[tool.poetry.scripts]
+valuous = "valuous.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
