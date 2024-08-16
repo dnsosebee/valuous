@@ -1,9 +1,9 @@
 from valuous.self.setup import setup
 
 
-def main():
+def hello():
     setup()
 
 
 if __name__ == '__main__':
-    main()
+    hello()
