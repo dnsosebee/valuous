@@ -1,7 +1,7 @@
 
 from pycozo.client import Client
 
-from valuous.peripherals.logger import logger
+from valuous.peripherals.memory import logger
 
 db = Client('rocksdb', 'valuous' + '.db')
 

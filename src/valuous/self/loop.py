@@ -4,12 +4,12 @@ from time import sleep
 from valuous.peripherals.cli import cli
 from valuous.peripherals.openai import openAI
 from valuous.self import sync
-from valuous.self.procedure import procedure
+from valuous.self.decorators import trace
 
 # from valuous.self.db import db
 
 
-@procedure
+@trace(goal="Complete a single cycle of work towards all current tasks.")
 def loop():
 
     # GIT IO

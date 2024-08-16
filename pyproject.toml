@@ -17,7 +17,7 @@ openai = "^1.37.0"
 pycozo = {extras = ["embedded", "pandas", "requests"], version = "^0.7.6"}
 
 [tool.poetry.scripts]
-valuous = "valuous.main:main"
+start = "valuous.main:main"
 
 [build-system]
 requires = ["poetry-core"]
