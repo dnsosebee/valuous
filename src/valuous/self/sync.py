@@ -1,9 +1,11 @@
 from valuous.peripherals import git
 from valuous.peripherals.memory import remember
+from valuous.self.decorators import trace
 
 USER_BRANCH = "user"
 
 
+@trace("keep up with user branch")
 def sync_git():
     status = git.get_porcelain_status()
     if status:
