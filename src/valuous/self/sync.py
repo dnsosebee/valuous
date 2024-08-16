@@ -16,3 +16,5 @@ def sync_git():
         remember("Merge conflict detected. Aborting merge.")
         git.abort_merge()
     git.push()
+
+# test
