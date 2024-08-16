@@ -3,8 +3,8 @@ from time import sleep
 
 from valuous.peripherals.cli import cli
 from valuous.peripherals.openai import openAI
+from valuous.self import sync
 from valuous.self.procedure import procedure
-from valuous.self.sync_git import git_process
 
 # from valuous.self.db import db
 
@@ -13,7 +13,7 @@ from valuous.self.sync_git import git_process
 def loop():
 
     # GIT IO
-    git_process()
+    sync.sync_git()
 
     # CLI IO
     if cli.get_num_messages() > 0:

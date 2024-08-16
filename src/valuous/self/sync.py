@@ -1,14 +1,18 @@
-from valuous.peripherals.git import (commit_all, fetch_branch,
-                                     get_porcelain_status, merge)
+from valuous.peripherals import git
+from valuous.peripherals.logger import logger
 
 USER_BRANCH = "user"
 
 
 def sync_git():
-    status = get_porcelain_status()
+    status = git.get_porcelain_status()
     if status:
-        commit_all()
-    fetch_branch(USER_BRANCH)
-    merge(USER_BRANCH)
-    status = get_porcelain_status()
-    # check for conflicts
+        logger.log("Committing local changes.")
+        git.commit_all()
+    git.fetch_branch(USER_BRANCH)
+    git.merge(USER_BRANCH)
+    status = git.get_porcelain_status()
+    if 'UU' in status:
+        logger.log("Merge conflict detected. Aborting merge.")
+        git.abort_merge()
+    git.push()
