@@ -15,4 +15,4 @@ from valuous.self.decorators import trace
 
 @trace("remember")
 def remember(message: str):
-    print(f"Remembered: {message}")
+    return message
