@@ -2,7 +2,7 @@ import subprocess
 
 
 def get_porcelain_status():
-    return subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True, stdout=subprocess.DEVNULL).stdout
+    return subprocess.run(['git', 'status', '--porcelain'], text=True, stdout=subprocess.PIPE).stdout
 
 
 def commit_all(message="Auto-commit"):
