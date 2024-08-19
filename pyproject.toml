@@ -15,10 +15,17 @@ pydantic = {extras = ["dotenv"], version = "^2.7.4"}
 pydantic-settings = "^2.3.3"
 openai = "^1.37.0"
 pycozo = {extras = ["embedded", "pandas", "requests"], version = "^0.7.6"}
+pytest = "^8.3.2"
+pure-teleapi = "^1.7.4"
 
 [tool.poetry.scripts]
 start = "valuous.main:main"
+test = "pytest:main"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "-v -s"
+testpaths = ["tests"]

@@ -1,13 +1,17 @@
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     openai_api_key: str
     github_token: str
-    google_valuous_app_credentials: str
+    telegram_bot_token: str
+    # google_valuous_app_credentials: str
+    # google_service_account_credentials: str
 
-    class Config:
-        env_file = ".env"
+    model_config = ConfigDict(
+        env_file=".env",
+    )
 
 
 settings = Settings()
