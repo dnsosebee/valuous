@@ -8,7 +8,7 @@ def test_get_tool():
     assert tool.module == "valuous.example_module.example_submodule"
     assert tool.name == "tool_function"
     assert tool.description == "Returns a message based on the input"
-    assert tool.input_class.__name__ == "TestPeripheralArgs"
+    assert tool.input_class.__qualname__ == "TestPeripheralArgs"
     assert tool.func == tool_function
 
     instance = {"name": "foo"}

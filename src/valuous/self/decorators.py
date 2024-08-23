@@ -9,7 +9,7 @@ def trace(goal: str = "unknown"):
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
-            info = {"module": func.__module__, "name": func.__name__,
+            info = {"module": func.__module__, "qualified_name": func.__qualname__,
                     "goal": goal, "args": args, "kwargs": kwargs, "result": result}
             logging.info(f"Trace: {info}")
             return result

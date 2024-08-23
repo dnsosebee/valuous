@@ -37,7 +37,7 @@ async def test_gmail():
     assert unread_message.sender == "Valuous Test Inbox 1 <valuous+test1@gmail.com>"
     unread_message.mark_as_read()
 
-    reply = gmail.create_email_reply(gmail.CreateEmailReplyArgs(
+    reply = gmail.send_reply_t(gmail.SendReplyArgs(
         original_email=unread_message,
         reply_text="I'm good, thanks!",
         reply_sender="Valuous Test Inbox 2 <valuous+test2@gmail.com>"

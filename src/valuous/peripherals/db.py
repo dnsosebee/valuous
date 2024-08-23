@@ -30,3 +30,16 @@ for s in schema:
 
 #             :put procedure_v1 {name, code}
 #             """, {'name': name, 'code': code})
+
+
+# res = db.run("""
+#                    ?[code] := *procedure_v1{name: "loop", code @ 'NOW'}
+#     """)
+
+# loop_code = res.iloc[0]['code']
+
+# print("\n\n\n")
+# print(loop_code)
+# sleep(1)
+
+# print("done")
