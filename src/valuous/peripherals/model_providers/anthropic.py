@@ -6,13 +6,20 @@ from valuous.settings import settings
 
 anthropic = Anthropic(api_key=settings.anthropic_api_key)
 
+simple_json_schema = {
+    "type": "object",
+    "properties": {
+    }
+}
+
 
 def as_anthropic_tools(tools: list[Tool]) -> list[ToolParam]:
     return [
         ToolParam(
             name=tool.module + "." + tool.name,
             description=tool.description,
-            input_schema=tool.input_class.model_json_schema(),
+            input_schema=tool.input_class.model_json_schema(
+            ) if tool.input_class else simple_json_schema
         )
         for tool in tools
     ]
