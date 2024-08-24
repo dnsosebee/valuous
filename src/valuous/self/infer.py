@@ -4,8 +4,8 @@ from anthropic.types.message_param import MessageParam
 from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from pydantic import BaseModel
 
-from valuous.peripherals.model_providers.anthropic import (anthropic,
-                                                           as_anthropic_tools)
+from valuous.peripherals.model_providers.anthropic import (
+    anthropic, as_anthropic_tool_name, as_anthropic_tools)
 from valuous.self.tool import Tool
 
 max_tokens = 1024
@@ -19,9 +19,9 @@ class InferArgs(BaseModel):
 
 def infer(args: InferArgs):
 
-    tools = as_anthropic_tools(args.tools)
+    anthropic_tools = as_anthropic_tools(args.tools)
 
-    print(tools)
+    print(anthropic_tools)
 
     assistant_message = anthropic.messages.create(
         model="claude-3-5-sonnet-20240620",
@@ -29,7 +29,7 @@ def infer(args: InferArgs):
         stream=False,
         system=args.system,
         messages=args.messages,
-        tools=tools,
+        tools=anthropic_tools,
         tool_choice={"type": "any"},
     )
 
@@ -69,8 +69,8 @@ Interaction = Union[SuccessInteraction, FailureInteraction]
 
 
 def resolve_interaction(tool_use: ToolUseBlockParam, tools: list[Tool]) -> Interaction:
-    matching_tool = next((tool for tool in tools if tool.name ==
-                          tool_use.module + "." + tool_use.name), None)
+    matching_tool = next(
+        (tool for tool in tools if as_anthropic_tool_name(tool) == tool_use.name), None)
     if matching_tool is None:
         return {
             "tool_use_id": tool_use.id,
@@ -98,10 +98,3 @@ def resolve_interaction(tool_use: ToolUseBlockParam, tools: list[Tool]) -> Inter
                     "tool": matching_tool,
                     "args": tool_input,
                 }
-
-# tool_use_response = {
-#     "type": "tool_use",
-#     "tool_use_id": tool_use.id,
-#     "content": str(e),
-#     "is_error": True,
-# }
