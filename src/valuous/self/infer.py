@@ -25,7 +25,7 @@ def infer(args: InferArgs):
         system=args.system,
         messages=args.messages,
         tools=as_anthropic_tools(args.tools),
-        tool_choice="any",
+        tool_choice={"type": "any"},
     )
 
     tool_uses = [
