@@ -18,13 +18,18 @@ class InferArgs(BaseModel):
 
 
 def infer(args: InferArgs):
+
+    tools = as_anthropic_tools(args.tools)
+
+    print(tools)
+
     assistant_message = anthropic.messages.create(
         model="claude-3-5-sonnet-20240620",
         max_tokens=max_tokens,
         stream=False,
         system=args.system,
         messages=args.messages,
-        tools=as_anthropic_tools(args.tools),
+        tools=tools,
         tool_choice={"type": "any"},
     )
 
