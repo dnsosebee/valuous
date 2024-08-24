@@ -1,3 +1,5 @@
+from typing import Literal, Type, TypedDict, Union
+
 from anthropic.types.message_param import MessageParam
 from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from pydantic import BaseModel
@@ -35,49 +37,66 @@ def infer(args: InferArgs):
             "tool_message": None,
         }
 
-    tool_use_responses = []
+    interactions = []
     for tool_use in tool_uses:
-        tool_use_response = None
-        try:
-            tool_use_response = handle_tool_use(tool_use, args.tools)
-        except Exception as e:
-            tool_use_response = {
-                "type": "tool_use",
-                "tool_use_id": tool_use.id,
-                "content": str(e),
-                "is_error": True,
-            }
-        tool_use_responses.append(tool_use_response)
-
-    user_message = {
-        "type": "user",
-        "content": tool_use_responses,
-    }
+        interactions.append(resolve_interaction(tool_use, args.tools))
 
     return {
         "assistant_message": assistant_message,
-        "user_message": user_message,
+        "interactions": interactions,
     }
 
 
-def handle_tool_use(tool_use: ToolUseBlockParam, tools: list[Tool]):
+class SuccessInteraction(TypedDict):
+    tool_use_id: str
+    is_error: Literal[False]
+    tool: Tool
+    args: Type[BaseModel]
+
+
+class FailureInteraction(TypedDict):
+    tool_use_id: str
+    is_error: Literal[True]
+    exception: Exception
+
+
+Interaction = Union[SuccessInteraction, FailureInteraction]
+
+
+def resolve_interaction(tool_use: ToolUseBlockParam, tools: list[Tool]) -> Interaction:
     matching_tool = next((tool for tool in tools if tool.name ==
                           tool_use.module + "." + tool_use.name), None)
     if matching_tool is None:
-        raise ValueError("Tool not found")
+        return {
+            "tool_use_id": tool_use.id,
+            "exception": ValueError("Tool not found"),
+        }
     else:
         try:
             tool_input = matching_tool.input_class(**tool_use.input)
         except Exception as e:
-            raise ValueError(f"Invalid input for tool: {str(e)}")
+            return {
+                "tool_use_id": tool_use.id,
+                "exception": ValueError(f"Invalid input for tool: {str(e)}"),
+            }
         else:
             try:
                 matching_tool.func(tool_input)
             except Exception as e:
-                raise ValueError(f"Error calling tool: {str(e)}")
+                return {
+                    "tool_use_id": tool_use.id,
+                    "exception": ValueError(f"Error calling tool: {str(e)}"),
+                }
             else:
                 return {
-                    "type": "tool_use",
                     "tool_use_id": tool_use.id,
-                    "content": matching_tool.func(tool_input),
+                    "tool": matching_tool,
+                    "args": tool_input,
                 }
+
+# tool_use_response = {
+#     "type": "tool_use",
+#     "tool_use_id": tool_use.id,
+#     "content": str(e),
+#     "is_error": True,
+# }

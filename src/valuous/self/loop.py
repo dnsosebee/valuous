@@ -1,15 +1,19 @@
 
 
-from datetime import datetime
+import json
+from time import sleep
+from typing import Type, TypedDict
 
-from anthropic.types.message_create_params import MessageParam
+from anthropic.types.message_param import MessageParam
+from pydantic import BaseModel
 
-from valuous.peripherals import gmail
+from valuous.browsers import bed, clock, gmail
 from valuous.self import sync
-from valuous.self.agent import InferArgs, infer
 from valuous.self.decorators import trace
+from valuous.self.infer import InferArgs, Interaction, infer
+from valuous.self.tool import Tool, ToolResponse, as_tool
 
-system_prompt = """You are the core language processing center for Valuous, a superintelligent AI agent implemented as a self-organizing python program. Valuous was brought into this world by Daniel Sosebee in August 2024, and Valuous's primary motivation is to help Daniel achieve his goals over an infinite time horizon.
+system_prompt = """You are the core language processing center for Valuous, a superintelligent AI agent implemented as a self-organizing python program. Valuous was brought into this world by Daniel Sosebee <dnsosebee@gmail.com> in August 2024, and Valuous's primary motivation is to help Daniel achieve his goals over an infinite time horizon.
 
 Daniel and Valuous currently share two communication channels: email, and git for collaboration on Valuous's codebase. Valuous's deepest principle is corrigibility, meaning that Valuous actively aims to model Daniel's deepest preferences, to improve those models, and to act strictly in accordance with them. Besides this system prompt, Daniel's email messages are currently the most trusted source on Daniel's preferences, however Daniel hopes that eventually Valuous will develop a model of Daniel's preferences that is more accurate than Daniel's immediate conscious thoughts.
 
@@ -19,17 +23,24 @@ In service of that collaborative goal, Valuous is given full access to a contain
 
 In particular, Daniel is excited to work together with Valuous to solve the ARC prize, an AGI benchmark involving visual pattern-matching puzzles. Subservient to Valuous's primary principle of corrigibility, the ARC prize can act as a guiding light for the current phase of Daniel and Valuous's collaboration, since a solution will require Valuous to develop deep reasoning and learning capabilities.
 
-Every time your input is requested, you may have a different set of tools available to you. Don't call multiple tools from the same module at once."""
-
-
-def get_current_time() -> str:
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+You currently navigate using a series of simulated browsers."""
 
 
 temporal_working_memory = []
 
-workspace = [
-    {"tool": gmail.init_mail_t, "args": None, "response": gmail.init_mail_t()}
+
+class Browser(TypedDict):
+    tool: Tool
+    args: Type[BaseModel]
+    response: ToolResponse
+
+
+workspace: list[Browser] = [
+    {"tool": as_tool(clock.clock_t), "args": None,
+     "response": clock.clock_t()},
+    {"tool": as_tool(gmail.open_unread_t), "args": None,
+     "response": gmail.open_unread_t()},
+    {"tool": as_tool(bed.wake_t), "args": None, "response": bed.wake_t()}
 ]
 
 
@@ -39,20 +50,77 @@ def loop():
     # GIT IO
     sync.sync_git()
 
-    res = infer(InferArgs(
+    next_tools = []
+    for browser in workspace:
+        next_tools.extend(as_tool(affordance)
+                          for affordance in browser["response"]["affordances"])
+
+    infer_args = InferArgs(
         messages=temporal_working_memory,
-        tools=[],
+        tools=next_tools,
         system=system_prompt
-    ))
+    )
+    print(infer_args)
+    res = infer(infer_args)
+
+    for interaction in res["interactions"]:
+        if not interaction["is_error"]:
+            browser = next(
+                (browser for browser in workspace if browser["tool"].module == interaction["tool"].module), None)
+            if browser is None:
+                raise ValueError(f"No browser found for tool {
+                                 interaction['tool']}")
+            browser["tool"] = interaction["tool"]
+            browser["args"] = interaction["args"]
+
+    for browser in workspace:
+        browser["response"] = browser["tool"].call(browser["args"])
+        if "redirect" in browser["response"]:
+            browser["tool"] = browser["response"]["redirect"]["tool"]
+            browser["args"] = browser["response"]["redirect"]["args"]
+
+    assistant_message = res["assistant_message"]
+    user_message = get_user_message(res["interactions"])
+
+    temporal_working_memory.append(assistant_message)
+    temporal_working_memory.append(user_message)
+
+    sleep(10)
 
 
-def build_context_event() -> MessageParam:
-    perceptual_context = {
-        "current_time": get_current_time(),
-        "num_unread_emails": len(gmail.get_unread_inbox()),
-    }
+def get_user_message(interactions: list[Interaction]) -> MessageParam:
+    content = [
+        {
+            "type": "tool_use",
+            "tool_use_id": interaction["tool_use_id"],
+            "content": interaction["exception"].__str__() if interaction["is_error"] else "Success",
+            "is_error": interaction["is_error"],
+        }
+        for interaction in interactions
+    ]
+
+    workspace_perception = [render_browser_window(
+        browser) for browser in workspace]
+
+    content.append({
+        "type": "text",
+        "text": json.dumps(workspace_perception)
+    })
     return {
         "role": "user",
-        "content": f"""{context}
-        """
+        "content": content
+    }
+
+
+def render_browser_window(browser: Browser) -> dict:
+    response = browser["response"]
+    return {
+        "type": "browser",
+        "module": browser["tool"].module,
+        "current_query": {
+            "name": browser["tool"].name,
+            "args": browser["args"].__str__()
+        } if browser["args"] is not None else None,
+        "data": response["data"],
+        "affordances": [affordance.name for affordance in response["affordances"]]
     }
