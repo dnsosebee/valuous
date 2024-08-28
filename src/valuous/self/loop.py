@@ -1,7 +1,6 @@
 
 
 import json
-from time import sleep
 from typing import Type, TypedDict
 
 from anthropic.types.message_param import MessageParam
@@ -83,13 +82,14 @@ def loop(last_interactions: list[Interaction] = []):
             browser["tool"] = interaction["tool"]
             browser["args"] = interaction["args"]
 
-    assistant_message = res["assistant_message"]
+    assistant_message = {"role": "assistant",
+                         "content": res["assistant_message"].content}
 
     new_last_interactions = res["interactions"]
 
     temporal_working_memory.append(assistant_message)
 
-    sleep(10)
+    # sleep(10)
 
     return new_last_interactions
 
