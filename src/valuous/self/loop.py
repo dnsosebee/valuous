@@ -69,7 +69,7 @@ def loop(last_interactions: list[Interaction] = []):
         tools=next_tools,
         system=system_prompt
     )
-    print(infer_args.model_dump())
+    print(temporal_working_memory)
     res = infer(infer_args)
 
     for interaction in res["interactions"]:
