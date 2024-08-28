@@ -51,6 +51,9 @@ def loop():
     # GIT IO
     sync.sync_git()
 
+    print("workspace")
+    print(workspace)
+
     for browser in workspace:
         browser["response"] = browser["tool"].func(
         ) if browser["args"] is None else browser["tool"].func(browser["args"])
@@ -71,7 +74,6 @@ def loop():
         tools=next_tools,
         system=system_prompt
     )
-    print(temporal_working_memory)
     res = infer(infer_args)
 
     for interaction in res["interactions"]:
