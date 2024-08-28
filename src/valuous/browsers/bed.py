@@ -1,5 +1,5 @@
 
-from valuous.self import shared_data
+from valuous.self.shared_data import shared_data
 from valuous.self.tool import ToolResponse
 
 
