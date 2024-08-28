@@ -35,12 +35,8 @@ def infer(args: InferArgs):
         tool_choice={"type": "any"},
     )
 
-    print(assistant_message.content)
-
     tool_uses = [
         it for it in assistant_message.content if it.type == "tool_use"]
-
-    print(tool_uses)
 
     if len(tool_uses) == 0:
         return {
