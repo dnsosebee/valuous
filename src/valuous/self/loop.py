@@ -91,6 +91,9 @@ def loop(last_interactions: list[Interaction] = []):
 
     # sleep(10)
 
+    print("new_last_interactions")
+    print(new_last_interactions)
+
     return new_last_interactions
 
 
