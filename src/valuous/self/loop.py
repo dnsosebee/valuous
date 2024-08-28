@@ -56,7 +56,7 @@ def loop():
         browser["response"] = browser["tool"].func(
         ) if browser["args"] is None else browser["tool"].func(browser["args"])
         if "redirect" in browser["response"]:
-            browser["tool"] = browser["response"]["redirect"]["tool"]
+            browser["tool"] = as_tool(browser["response"]["redirect"]["tool"])
             browser["args"] = browser["response"]["redirect"]["args"]
 
     user_message = get_user_message(last_interactions)
