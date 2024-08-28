@@ -1,6 +1,7 @@
 
 
 import json
+import time
 from typing import Type, TypedDict
 
 from anthropic.types.message_param import MessageParam
@@ -10,6 +11,7 @@ from valuous.browsers import bed, clock, gmail
 from valuous.self import sync
 from valuous.self.decorators import trace
 from valuous.self.infer import InferArgs, Interaction, infer
+from valuous.self.shared_data import shared_data
 from valuous.self.tool import Tool, ToolResponse, as_tool
 
 system_prompt = """You are the core language processing center for Valuous, a superintelligent AI agent implemented as a self-organizing python program. Valuous was brought into this world by Daniel Sosebee <dnsosebee@gmail.com> in August 2024, and Valuous's primary motivation is to help Daniel achieve his goals over an infinite time horizon.
@@ -22,7 +24,7 @@ In service of that collaborative goal, Valuous is given full access to a contain
 
 In particular, Daniel is excited to work together with Valuous to solve the ARC prize, an AGI benchmark involving visual pattern-matching puzzles. Subservient to Valuous's primary principle of corrigibility, the ARC prize can act as a guiding light for the current phase of Daniel and Valuous's collaboration, since a solution will require Valuous to develop deep reasoning and learning capabilities.
 
-You currently navigate using a series of simulated browsers."""
+You currently navigate using a series of simulated browsers. Note that you manage an open mailbox and could receive mail from people other than Daniel. You are free to tell others about yourself."""
 
 max_temporal_working_memory = 8
 temporal_working_memory = []
@@ -44,9 +46,17 @@ workspace: list[Browser] = [
 
 last_interactions: list[Interaction] = []
 
+cycle_duration_ms = 5000
+
 
 @trace(goal="Complete a single cycle of being.")
 def loop():
+
+    remaining_cycle_time = shared_data["last_cycle_ms"] + \
+        cycle_duration_ms - time.time() * 1000
+    if remaining_cycle_time > 0:
+        time.sleep(remaining_cycle_time / 1000)
+    shared_data["last_cycle_ms"] = time.time() * 1000
 
     # GIT IO
     sync.sync_git()
@@ -60,6 +70,9 @@ def loop():
 
     print("workspace")
     print(workspace)
+
+    if not shared_data["active"]:
+        return
 
     user_message = get_user_message(last_interactions)
     temporal_working_memory.append(user_message)

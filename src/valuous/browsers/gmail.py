@@ -6,21 +6,19 @@ from pydantic import BaseModel
 
 from valuous.peripherals import gmail
 from valuous.peripherals.simplegmail.message import Message
+from valuous.self.shared_data import shared_data
 from valuous.self.tool import ToolResponse
 
 valuous_sender = "Valuous <valuous@gmail.com>"
 
-
-# def init_mail_t() -> ToolResponse:
-#     data = {}
-#     affordances = [open_unread_t]
-#     return {"data": data, "affordances": affordances}
 
 def open_unread_t() -> ToolResponse:
     inbox = gmail.get_unread_inbox()
     data = {"unread_messages": [{"subject": m.subject, "snippet": m.snippet, "id": m.id}
             for m in inbox]}
     affordances = [view_message_t] if len(data) > 0 else []
+    if len(data) > 0:
+        shared_data["active"] = True
     return {
         "data": data,
         "affordances": affordances
@@ -39,6 +37,12 @@ class SendMessageArgs(BaseModel):
 def send_message_t(args: SendMessageArgs) -> ToolResponse:
     gmail.send_message(gmail.SendMessageArgs(
         **args.model_dump(), sender=valuous_sender))
+    response = open_unread_t()
+    response["redirect"] = {
+        "tool": open_unread_t,
+        "args": None
+    }
+    return response
 
 
 class ViewMessageArgs(BaseModel):
