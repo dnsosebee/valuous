@@ -128,5 +128,5 @@ def render_browser_window(browser: Browser) -> dict:
             "args": browser["args"].__str__()
         } if browser["args"] is not None else None,
         "data": response["data"],
-        "affordances": [affordance.name for affordance in response["affordances"]]
+        "affordances": [as_tool(affordance).name for affordance in response["affordances"]]
     }
