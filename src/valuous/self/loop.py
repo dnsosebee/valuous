@@ -46,7 +46,7 @@ workspace: list[Browser] = [
 
 last_interactions: list[Interaction] = []
 
-cycle_duration_ms = 5000
+cycle_duration_ms = 100
 
 
 @trace(goal="Complete a single cycle of being.")
@@ -115,8 +115,6 @@ def loop():
                          "content": res["assistant_message"].content}
 
     temporal_working_memory.append(assistant_message)
-
-    # sleep(10)
 
 
 def get_user_message(interactions: list[Interaction]) -> MessageParam:
