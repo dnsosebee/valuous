@@ -16,6 +16,10 @@ class InferArgs(BaseModel):
     system: str
     tools: list[Tool]
 
+    model_config = {
+        "arbitrary_types_allowed": True
+    }
+
 
 def infer(args: InferArgs):
 
