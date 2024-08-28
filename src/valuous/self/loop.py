@@ -24,7 +24,7 @@ In particular, Daniel is excited to work together with Valuous to solve the ARC 
 
 You currently navigate using a series of simulated browsers."""
 
-
+max_temporal_working_memory = 8
 temporal_working_memory = []
 
 
@@ -51,9 +51,6 @@ def loop():
     # GIT IO
     sync.sync_git()
 
-    print("workspace")
-    print(workspace)
-
     for browser in workspace:
         browser["response"] = browser["tool"].func(
         ) if browser["args"] is None else browser["tool"].func(browser["args"])
@@ -61,9 +58,15 @@ def loop():
             browser["tool"] = as_tool(browser["response"]["redirect"]["tool"])
             browser["args"] = browser["response"]["redirect"]["args"]
 
+    print("workspace")
+    print(workspace)
+
     user_message = get_user_message(last_interactions)
     temporal_working_memory.append(user_message)
 
+    if len(temporal_working_memory) >= max_temporal_working_memory:
+        temporal_working_memory[:] = temporal_working_memory[
+            len(temporal_working_memory) - max_temporal_working_memory:]
     next_tools = []
     for browser in workspace:
         next_tools.extend(as_tool(affordance)

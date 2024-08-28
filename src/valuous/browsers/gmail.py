@@ -49,7 +49,12 @@ def view_message_t(args: ViewMessageArgs) -> ToolResponse:
     inbox = gmail.get_unread_inbox()
     message = next((m for m in inbox if m.id == args.id), None)
     message.mark_as_read()
-    data = {"message": message}
+    data = {"message": {
+        "subject": message.subject,
+        "id": message.id,
+        "snippet": message.snippet,
+        "plain": message.plain,
+    }}
     affordances = [open_unread_t, get_send_reply_t(
         original_email=message, reply_sender=valuous_sender)]
     return {"data": data, "affordances": affordances}
