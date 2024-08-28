@@ -80,6 +80,10 @@ def loop():
     if len(temporal_working_memory) >= max_temporal_working_memory:
         temporal_working_memory[:] = temporal_working_memory[
             len(temporal_working_memory) - max_temporal_working_memory:]
+
+    while temporal_working_memory[0].role != "user":
+        temporal_working_memory.pop(0)
+
     next_tools = []
     for browser in workspace:
         next_tools.extend(as_tool(affordance)
