@@ -43,12 +43,23 @@ workspace: list[Browser] = [
     {"tool": as_tool(bed.wake_t), "args": None, "response": bed.wake_t()}
 ]
 
+last_interactions: list[Interaction] = []
+
 
 @ trace(goal="Complete a single cycle of being.")
 def loop():
 
     # GIT IO
     sync.sync_git()
+
+    for browser in workspace:
+        browser["response"] = browser["tool"].call(browser["args"])
+        if "redirect" in browser["response"]:
+            browser["tool"] = browser["response"]["redirect"]["tool"]
+            browser["args"] = browser["response"]["redirect"]["args"]
+
+    user_message = get_user_message(last_interactions)
+    temporal_working_memory.append(user_message)
 
     next_tools = []
     for browser in workspace:
@@ -73,17 +84,11 @@ def loop():
             browser["tool"] = interaction["tool"]
             browser["args"] = interaction["args"]
 
-    for browser in workspace:
-        browser["response"] = browser["tool"].call(browser["args"])
-        if "redirect" in browser["response"]:
-            browser["tool"] = browser["response"]["redirect"]["tool"]
-            browser["args"] = browser["response"]["redirect"]["args"]
-
     assistant_message = res["assistant_message"]
-    user_message = get_user_message(res["interactions"])
+
+    last_interactions.append(res["interactions"])
 
     temporal_working_memory.append(assistant_message)
-    temporal_working_memory.append(user_message)
 
     sleep(10)
 
