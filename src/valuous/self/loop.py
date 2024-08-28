@@ -53,7 +53,7 @@ def loop():
     sync.sync_git()
 
     for browser in workspace:
-        browser["response"] = browser["tool"].call(browser["args"])
+        browser["response"] = browser["tool"].func(browser["args"])
         if "redirect" in browser["response"]:
             browser["tool"] = browser["response"]["redirect"]["tool"]
             browser["args"] = browser["response"]["redirect"]["args"]
