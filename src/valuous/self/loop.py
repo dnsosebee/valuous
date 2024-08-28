@@ -95,6 +95,7 @@ def loop():
 
 
 def get_user_message(interactions: list[Interaction]) -> MessageParam:
+    print(interactions)
     content = [
         {
             "type": "tool_use",
