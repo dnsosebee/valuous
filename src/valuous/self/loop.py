@@ -68,8 +68,10 @@ def loop():
             browser["tool"] = as_tool(browser["response"]["redirect"]["tool"])
             browser["args"] = browser["response"]["redirect"]["args"]
 
-    print("workspace")
+    print("\nworkspace")
     print(workspace)
+    print("\nshared_data")
+    print(shared_data)
 
     if not shared_data["active"]:
         return
