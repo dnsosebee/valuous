@@ -76,7 +76,12 @@ def loop():
     )
     res = infer(infer_args)
 
-    for interaction in res["interactions"]:
+    last_interactions[:] = res["interactions"]
+
+    print("last_interactions")
+    print(last_interactions)
+
+    for interaction in last_interactions:
         if not interaction["is_error"]:
             browser = next(
                 (browser for browser in workspace if browser["tool"].module == interaction["tool"].module), None)
@@ -88,8 +93,6 @@ def loop():
 
     assistant_message = {"role": "assistant",
                          "content": res["assistant_message"].content}
-
-    last_interactions[:] = res["interactions"]
 
     temporal_working_memory.append(assistant_message)
 
