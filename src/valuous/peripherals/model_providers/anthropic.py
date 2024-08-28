@@ -25,5 +25,19 @@ def as_anthropic_tools(tools: list[Tool]) -> list[ToolParam]:
     ]
 
 
+browser_prefix = "valuous-browser-"
+
+
 def as_anthropic_tool_name(tool: Tool) -> str:
-    return (tool.module + "." + tool.name).replace(".", "-")
+    # Combine module and name, replace dots with underscores, and limit to 64 characters
+    combined_name = (tool.module + "_" + tool.name).replace(".", "-")
+    # Ensure the name only contains alphanumeric characters and underscores
+    sanitized_name = ''.join(
+        c for c in combined_name if c.isalnum() or c == '_')
+    # Truncate to 64 characters if necessary
+
+    # remove browser prefix if it exists
+    if sanitized_name.startswith(browser_prefix):
+        sanitized_name = sanitized_name[len(browser_prefix):]
+
+    return sanitized_name[:64]

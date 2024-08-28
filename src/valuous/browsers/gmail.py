@@ -52,7 +52,6 @@ def view_message_t(args: ViewMessageArgs) -> ToolResponse:
     data = {"message": {
         "subject": message.subject,
         "id": message.id,
-        "snippet": message.snippet,
         "plain": message.plain,
     }}
     affordances = [open_unread_t, get_send_reply_t(
