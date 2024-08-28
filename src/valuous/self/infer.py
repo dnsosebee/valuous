@@ -74,6 +74,7 @@ def resolve_interaction(tool_use: ToolUseBlockParam, tools: list[Tool]) -> Inter
     if matching_tool is None:
         return {
             "tool_use_id": tool_use.id,
+            "is_error": True,
             "exception": ValueError("Tool not found"),
         }
     else:
@@ -82,6 +83,7 @@ def resolve_interaction(tool_use: ToolUseBlockParam, tools: list[Tool]) -> Inter
         except Exception as e:
             return {
                 "tool_use_id": tool_use.id,
+                "is_error": True,
                 "exception": ValueError(f"Invalid input for tool: {str(e)}"),
             }
         else:
@@ -90,11 +92,13 @@ def resolve_interaction(tool_use: ToolUseBlockParam, tools: list[Tool]) -> Inter
             except Exception as e:
                 return {
                     "tool_use_id": tool_use.id,
+                    "is_error": True,
                     "exception": ValueError(f"Error calling tool: {str(e)}"),
                 }
             else:
                 return {
                     "tool_use_id": tool_use.id,
+                    "is_error": False,
                     "tool": matching_tool,
                     "args": tool_input,
                 }
