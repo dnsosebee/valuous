@@ -42,9 +42,11 @@ workspace: list[Browser] = [
     {"tool": as_tool(bed.wake_t), "args": None, "response": bed.wake_t()}
 ]
 
+last_interactions: list[Interaction] = []
+
 
 @trace(goal="Complete a single cycle of being.")
-def loop(last_interactions: list[Interaction] = []):
+def loop():
 
     # GIT IO
     sync.sync_git()
@@ -85,16 +87,11 @@ def loop(last_interactions: list[Interaction] = []):
     assistant_message = {"role": "assistant",
                          "content": res["assistant_message"].content}
 
-    new_last_interactions = res["interactions"]
+    last_interactions[:] = res["interactions"]
 
     temporal_working_memory.append(assistant_message)
 
     # sleep(10)
-
-    print("new_last_interactions")
-    print(new_last_interactions)
-
-    return new_last_interactions
 
 
 def get_user_message(interactions: list[Interaction]) -> MessageParam:
