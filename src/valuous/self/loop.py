@@ -95,6 +95,8 @@ def loop(last_interactions: list[Interaction] = []):
 
 
 def get_user_message(interactions: list[Interaction]) -> MessageParam:
+    print("interactions")
+    print(interactions)
     content = [
         {
             "type": "tool_result",
@@ -105,6 +107,7 @@ def get_user_message(interactions: list[Interaction]) -> MessageParam:
         for interaction in interactions
     ]
 
+    print("content")
     workspace_perception = [render_browser_window(
         browser) for browser in workspace]
 
