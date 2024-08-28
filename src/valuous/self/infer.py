@@ -25,8 +25,6 @@ def infer(args: InferArgs):
 
     anthropic_tools = as_anthropic_tools(args.tools)
 
-    print(anthropic_tools)
-
     assistant_message = anthropic.messages.create(
         model="claude-3-5-sonnet-20240620",
         max_tokens=max_tokens,

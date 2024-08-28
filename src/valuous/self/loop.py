@@ -69,7 +69,7 @@ def loop(last_interactions: list[Interaction] = []):
         tools=next_tools,
         system=system_prompt
     )
-    print(infer_args)
+    print(infer_args.model_dump_json(indent=2))
     res = infer(infer_args)
 
     for interaction in res["interactions"]:
@@ -95,7 +95,6 @@ def loop(last_interactions: list[Interaction] = []):
 
 
 def get_user_message(interactions: list[Interaction]) -> MessageParam:
-    print(interactions)
     content = [
         {
             "type": "tool_result",
