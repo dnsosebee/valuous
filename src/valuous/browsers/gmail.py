@@ -16,8 +16,9 @@ def open_unread_t() -> ToolResponse:
     inbox = gmail.get_unread_inbox()
     data = {"unread_messages": [{"subject": m.subject, "snippet": m.snippet, "id": m.id}
             for m in inbox]}
-    affordances = [view_message_t] if len(data) > 0 else []
-    if len(data) > 0:
+    unread_count = len(data["unread_messages"])
+    affordances = [view_message_t] if unread_count > 0 else []
+    if unread_count > 0:
         shared_data["active"] = True
     return {
         "data": data,
