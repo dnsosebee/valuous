@@ -98,7 +98,7 @@ def get_user_message(interactions: list[Interaction]) -> MessageParam:
     print(interactions)
     content = [
         {
-            "type": "tool_use",
+            "type": "tool_result",
             "tool_use_id": interaction["tool_use_id"],
             "content": interaction["exception"].__str__() if interaction["is_error"] else "Success",
             "is_error": interaction["is_error"],
