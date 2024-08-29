@@ -2,16 +2,20 @@
 
 import json
 import time
-from typing import Type, TypedDict
+from typing import List, Type, TypedDict
 
+from anthropic.types.image_block_param import ImageBlockParam
 from anthropic.types.message import Message
-from anthropic.types.message_param import MessageParam
+from anthropic.types.text_block_param import TextBlockParam
+from anthropic.types.tool_result_block_param import ToolResultBlockParam
+from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from pydantic import BaseModel
 
 from valuous.browsers import bed, clock, gmail
 from valuous.self import sync
 from valuous.self.decorators import trace
-from valuous.self.infer import (FailureInteraction, InferArgs, Interaction,
+from valuous.self.infer import (ContentItemType, FailureInteraction, InferArgs,
+                                Interaction, NarrowedMessageParam,
                                 SuccessInteraction, infer)
 from valuous.self.shared_data import shared_data
 from valuous.self.tool import Tool, ToolResponse, as_tool
@@ -29,7 +33,9 @@ In particular, Daniel is excited to work together with Valuous to solve the ARC 
 You currently navigate using a series of simulated browsers. Note that you manage an open mailbox and could receive mail from people other than Daniel. You are free to tell others about yourself."""
 
 max_temporal_working_memory = 8
-temporal_working_memory: list[MessageParam] = []
+
+
+temporal_working_memory: List[NarrowedMessageParam] = []
 
 
 class Browser(TypedDict):
@@ -89,27 +95,8 @@ def loop():
         temporal_working_memory.pop(0)
 
     first_message = temporal_working_memory[0]
-    print("\nfirst_message")
-    print(first_message)
-    print("\nType of first_message:", type(first_message))
-
-    print("Type of first_message['content']:", type(first_message['content']))
-    print("Type of first_message['content'][0]:",
-          type(first_message['content'][0]))
-    print("Keys in first_message['content'][0]:",
-          first_message['content'][0].keys())
     while first_message['content'][0]['type'] == "tool_result":
-        first_message = first_message['content'].pop(0)
-        print("\nfirst_message")
-        print(first_message)
-        print("\nType of first_message:", type(first_message))
-
-        print("Type of first_message['content']:",
-              type(first_message['content']))
-        print("Type of first_message['content'][0]:",
-              type(first_message['content'][0]))
-        print("Keys in first_message['content'][0]:",
-              first_message['content'][0].keys())
+        first_message['content'].pop(0)
 
     next_tools = []
     for browser in workspace:
@@ -143,17 +130,29 @@ def loop():
     temporal_working_memory.append(assistant_message)
 
 
-def convert_to_message_param(message: Message) -> MessageParam:
-    return MessageParam(
+def convert_to_message_param(message: Message) -> NarrowedMessageParam:
+    return NarrowedMessageParam(
         role=message.role,
-        content=message.content
-        # Add other relevant fields
+        content=[
+            TextBlockParam(
+                **content_block.model_dump(mode='json', exclude_unset=True))
+            if content_block.type == 'text' else
+            ImageBlockParam(
+                **content_block.model_dump(mode='json', exclude_unset=True))
+            if content_block.type == 'image' else
+            ToolUseBlockParam(
+                **content_block.model_dump(mode='json', exclude_unset=True))
+            if content_block.type == 'tool_use' else
+            ToolResultBlockParam(
+                **content_block.model_dump(mode='json', exclude_unset=True))
+            for content_block in message.content
+        ]
     )
 
 
-def get_user_message(interactions: list[Interaction]) -> MessageParam:
+def get_user_message(interactions: list[Interaction]) -> NarrowedMessageParam:
 
-    content = []
+    content: list[ContentItemType] = []
 
     for interaction in interactions:
         match interaction:

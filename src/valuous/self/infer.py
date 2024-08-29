@@ -1,7 +1,11 @@
-from typing import Literal, Union
+from typing import List, Literal, Union
 
+from anthropic.types.image_block_param import ImageBlockParam
 from anthropic.types.message_param import MessageParam
+from anthropic.types.text_block_param import TextBlockParam
+from anthropic.types.tool_result_block_param import ToolResultBlockParam
 from anthropic.types.tool_use_block import ToolUseBlock
+from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from pydantic import BaseModel
 
 from valuous.peripherals.model_providers.anthropic import (
@@ -11,8 +15,16 @@ from valuous.self.tool import Tool
 max_tokens = 1024
 
 
+ContentItemType = Union[TextBlockParam, ImageBlockParam,
+                        ToolUseBlockParam, ToolResultBlockParam]
+
+
+class NarrowedMessageParam(MessageParam):
+    content: List[ContentItemType]
+
+
 class InferArgs(BaseModel):
-    messages: list[MessageParam]
+    messages: List[NarrowedMessageParam]
     system: str
     tools: list[Tool]
 
@@ -30,7 +42,7 @@ def infer(args: InferArgs):
         max_tokens=max_tokens,
         stream=False,
         system=args.system,
-        messages=args.messages,
+        messages=args.messages,  # type: ignore
         tools=anthropic_tools,
         tool_choice={"type": "any"},
     )
