@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict, Union
+from typing import Literal, Union
 
 from anthropic.types.message_param import MessageParam
 from anthropic.types.tool_use_block import ToolUseBlock
@@ -54,17 +54,21 @@ def infer(args: InferArgs):
     }
 
 
-class SuccessInteraction(TypedDict):
+class SuccessInteraction(BaseModel):
     tool_use_id: str
     is_error: Literal[False]
     tool: Tool
     args: BaseModel | None
 
 
-class FailureInteraction(TypedDict):
+class FailureInteraction(BaseModel):
     tool_use_id: str
     is_error: Literal[True]
     exception: Exception
+
+    model_config = {
+        "arbitrary_types_allowed": True
+    }
 
 
 Interaction = Union[SuccessInteraction, FailureInteraction]
@@ -74,32 +78,32 @@ def resolve_interaction(tool_use: ToolUseBlock, tools: list[Tool]) -> Interactio
     matching_tool = next(
         (tool for tool in tools if as_anthropic_tool_name(tool) == tool_use.name), None)
     if matching_tool is None:
-        return {
-            "tool_use_id": tool_use.id,
-            "is_error": True,
-            "exception": ValueError("Tool not found"),
-        }
+        return FailureInteraction(
+            tool_use_id=tool_use.id,
+            is_error=True,
+            exception=ValueError("Tool not found")
+        )
     elif matching_tool.input_class is None:
-        return {
-            "tool_use_id": tool_use.id,
-            "is_error": False,
-            "tool": matching_tool,
-            "args": None,
-        }
+        return SuccessInteraction(
+            tool_use_id=tool_use.id,
+            is_error=False,
+            tool=matching_tool,
+            args=None
+        )
     else:
         try:
             tool_input = matching_tool.input_class.model_validate(
                 tool_use.input)
         except Exception as e:
-            return {
-                "tool_use_id": tool_use.id,
-                "is_error": True,
-                "exception": ValueError(f"Invalid input for tool: {str(e)}"),
-            }
+            return FailureInteraction(
+                tool_use_id=tool_use.id,
+                is_error=True,
+                exception=ValueError(f"Invalid input for tool: {str(e)}")
+            )
         else:
-            return {
-                "tool_use_id": tool_use.id,
-                "is_error": False,
-                "tool": matching_tool,
-                "args": tool_input,
-            }
+            return SuccessInteraction(
+                tool_use_id=tool_use.id,
+                is_error=False,
+                tool=matching_tool,
+                args=tool_input
+            )
