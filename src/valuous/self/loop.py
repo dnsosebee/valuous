@@ -4,6 +4,7 @@ import json
 import time
 from typing import Type, TypedDict
 
+from anthropic.types.message import Message
 from anthropic.types.message_param import MessageParam
 from pydantic import BaseModel
 
@@ -28,7 +29,7 @@ In particular, Daniel is excited to work together with Valuous to solve the ARC 
 You currently navigate using a series of simulated browsers. Note that you manage an open mailbox and could receive mail from people other than Daniel. You are free to tell others about yourself."""
 
 max_temporal_working_memory = 8
-temporal_working_memory = []
+temporal_working_memory: list[MessageParam] = []
 
 
 class Browser(TypedDict):
@@ -88,6 +89,8 @@ def loop():
         temporal_working_memory.pop(0)
 
     first_message = temporal_working_memory[0]
+    print("\nfirst_message")
+    print(first_message)
     while first_message["content"][0]["type"] == "tool_result":
         first_message = first_message["content"].pop(0)
 
@@ -118,10 +121,17 @@ def loop():
                 browser["tool"] = tool
                 browser["args"] = args
 
-    assistant_message = {"role": "assistant",
-                         "content": res["assistant_message"].content}
+    assistant_message = convert_to_message_param(res["assistant_message"])
 
     temporal_working_memory.append(assistant_message)
+
+
+def convert_to_message_param(message: Message) -> MessageParam:
+    return MessageParam(
+        role=message.role,
+        content=message.content
+        # Add other relevant fields
+    )
 
 
 def get_user_message(interactions: list[Interaction]) -> MessageParam:

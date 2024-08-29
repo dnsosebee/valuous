@@ -1,4 +1,3 @@
-from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -10,9 +9,9 @@ class Settings(BaseSettings):
     # google_valuous_app_credentials: str
     # google_service_account_credentials: str
 
-    model_config = ConfigDict(
-        env_file=".env",
-    )
+    model_config = {
+        "env_file": ".env"
+    }
 
 
-settings = Settings()
+settings = Settings()  # type: ignore
