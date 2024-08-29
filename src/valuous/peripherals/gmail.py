@@ -2,9 +2,8 @@
 from typing import List, Optional
 
 from pydantic import BaseModel
-
-from valuous.peripherals.simplegmail import Gmail
-from valuous.peripherals.simplegmail.message import Message
+from simplegmail import Gmail
+from simplegmail.message import Message
 
 _client: Gmail = Gmail(client_secret_file='secrets/gmail_client_secret.json',
                        creds_file='secrets/gmail_token.json', access_type='offline')
@@ -73,6 +72,6 @@ def send_reply(original_email: Message, reply_text: str, reply_sender: str) -> S
         sender=reply_sender,
         subject=_reply_subject(original_email.subject),
         msg_html=html_body,
-        msg_plain=plain_body,
+        msg_plain=plain_body or "",
         signature=False
     )

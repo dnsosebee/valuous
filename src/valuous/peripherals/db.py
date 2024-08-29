@@ -1,8 +1,6 @@
 
 from pycozo.client import Client
 
-from valuous.peripherals.memory import logger
-
 db = Client('rocksdb', 'valuous' + '.db')
 
 # initialize DB
@@ -15,8 +13,8 @@ for s in schema:
     try:
         db.run(s)
     except Exception as e:
-        if e.code == 'eval::stored_relation_conflict':
-            logger.warning(f'Schema already exists: {s}')
+        if 'eval::stored_relation_conflict' in str(e):
+            print(f'Schema already exists: {s}')
         else:
             raise
 

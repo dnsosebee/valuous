@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Callable, List
+from typing import Any, Callable, List, NotRequired
 
 from pydantic import BaseModel
 from typing_extensions import TypedDict
@@ -44,6 +44,8 @@ def as_tool(func: Callable) -> Tool:
 
 
 def validate_args(tool: Tool, input: dict):
+    if tool.input_class is None:
+        return None
     return tool.input_class(**input)
 
 
@@ -60,4 +62,4 @@ class ToolRedirect(TypedDict):
 class ToolResponse(TypedDict):
     data: dict[str, Any]
     affordances: List[Callable]
-    redirect: ToolRedirect | None
+    redirect: NotRequired[ToolRedirect]

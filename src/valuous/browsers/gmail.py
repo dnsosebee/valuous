@@ -3,9 +3,9 @@
 from typing import Callable, List, Optional
 
 from pydantic import BaseModel
+from simplegmail.message import Message
 
 from valuous.peripherals import gmail
-from valuous.peripherals.simplegmail.message import Message
 from valuous.self.shared_data import shared_data
 from valuous.self.tool import ToolResponse
 
@@ -53,6 +53,8 @@ class ViewMessageArgs(BaseModel):
 def view_message_t(args: ViewMessageArgs) -> ToolResponse:
     inbox = gmail.get_unread_inbox()
     message = next((m for m in inbox if m.id == args.id), None)
+    if message is None:
+        raise ValueError(f"Message with id {args.id} not found")
     message.mark_as_read()
     data = {"message": {
         "subject": message.subject,

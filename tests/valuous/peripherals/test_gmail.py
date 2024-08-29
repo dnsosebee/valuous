@@ -51,6 +51,8 @@ async def test_gmail():
 
     unread_message = test_messages[0]
     assert unread_message.subject == "Re: Test email 1"
+    assert unread_message.html is not None
+    assert unread_message.plain is not None
     assert "<body><p>I\'m good, thanks!</p>\n<p>On " in unread_message.html
     assert """, Valuous Test Inbox 1 <valuous> wrote:</valuous></p>\n<blockquote style="border-left: 1px solid #ccc; margin: 0 0 0 .8ex; padding-left: 1ex;">\n<p>Hi,<br/>How are you?</p>\n</blockquote>\n</body>""" in unread_message.html
     assert "I'm good, thanks!\n\nOn " in unread_message.plain

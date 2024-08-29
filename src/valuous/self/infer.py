@@ -1,7 +1,7 @@
-from typing import Literal, Type, TypedDict, Union
+from typing import Literal, TypedDict, Union
 
 from anthropic.types.message_param import MessageParam
-from anthropic.types.tool_use_block_param import ToolUseBlockParam
+from anthropic.types.tool_use_block import ToolUseBlock
 from pydantic import BaseModel
 
 from valuous.peripherals.model_providers.anthropic import (
@@ -58,7 +58,7 @@ class SuccessInteraction(TypedDict):
     tool_use_id: str
     is_error: Literal[False]
     tool: Tool
-    args: Type[BaseModel]
+    args: BaseModel | None
 
 
 class FailureInteraction(TypedDict):
@@ -70,7 +70,7 @@ class FailureInteraction(TypedDict):
 Interaction = Union[SuccessInteraction, FailureInteraction]
 
 
-def resolve_interaction(tool_use: ToolUseBlockParam, tools: list[Tool]) -> Interaction:
+def resolve_interaction(tool_use: ToolUseBlock, tools: list[Tool]) -> Interaction:
     matching_tool = next(
         (tool for tool in tools if as_anthropic_tool_name(tool) == tool_use.name), None)
     if matching_tool is None:
@@ -88,7 +88,8 @@ def resolve_interaction(tool_use: ToolUseBlockParam, tools: list[Tool]) -> Inter
         }
     else:
         try:
-            tool_input = matching_tool.input_class(**tool_use.input)
+            tool_input = matching_tool.input_class.model_validate(
+                tool_use.input)
         except Exception as e:
             return {
                 "tool_use_id": tool_use.id,

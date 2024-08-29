@@ -10,7 +10,8 @@ from pydantic import BaseModel
 from valuous.browsers import bed, clock, gmail
 from valuous.self import sync
 from valuous.self.decorators import trace
-from valuous.self.infer import InferArgs, Interaction, infer
+from valuous.self.infer import (InferArgs, Interaction, SuccessInteraction,
+                                infer)
 from valuous.self.shared_data import shared_data
 from valuous.self.tool import Tool, ToolResponse, as_tool
 
@@ -32,7 +33,7 @@ temporal_working_memory = []
 
 class Browser(TypedDict):
     tool: Tool
-    args: Type[BaseModel]
+    args: Type[BaseModel] | None
     response: ToolResponse
 
 
@@ -108,14 +109,14 @@ def loop():
     print(last_interactions)
 
     for interaction in last_interactions:
-        if not interaction["is_error"]:
-            browser = next(
-                (browser for browser in workspace if browser["tool"].module == interaction["tool"].module), None)
-            if browser is None:
-                raise ValueError(f"No browser found for tool {
-                                 interaction['tool']}")
-            browser["tool"] = interaction["tool"]
-            browser["args"] = interaction["args"]
+        match interaction:
+            case SuccessInteraction(tool=tool, args=args):
+                browser = next(
+                    (browser for browser in workspace if browser["tool"].module == tool.module), None)
+                if browser is None:
+                    raise ValueError(f"No browser found for tool {tool}")
+                browser["tool"] = tool
+                browser["args"] = args
 
     assistant_message = {"role": "assistant",
                          "content": res["assistant_message"].content}
@@ -125,15 +126,24 @@ def loop():
 
 def get_user_message(interactions: list[Interaction]) -> MessageParam:
 
-    content = [
-        {
-            "type": "tool_result",
-            "tool_use_id": interaction["tool_use_id"],
-            "content": interaction["exception"].__str__() if interaction["is_error"] else "Success",
-            "is_error": interaction["is_error"],
-        }
-        for interaction in interactions
-    ]
+    content = []
+
+    for interaction in interactions:
+        match interaction:
+            case {"is_error": True, "tool_use_id": tool_use_id, "exception": exception}:
+                content.append({
+                    "type": "tool_result",
+                    "tool_use_id": tool_use_id,
+                    "content": str(exception),
+                    "is_error": True,
+                })
+            case {"is_error": False, "tool_use_id": tool_use_id}:
+                content.append({
+                    "type": "tool_result",
+                    "tool_use_id": tool_use_id,
+                    "content": "Success",
+                    "is_error": False,
+                })
 
     workspace_perception = [render_browser_window(
         browser) for browser in workspace]
@@ -155,7 +165,7 @@ def render_browser_window(browser: Browser) -> dict:
         "module": browser["tool"].module,
         "current_query": {
             "name": browser["tool"].name,
-            "args": browser["args"].__str__()
+            "args": str(browser["args"])
         } if browser["args"] is not None else None,
         "data": response["data"],
         "affordances": [as_tool(affordance).name for affordance in response["affordances"]]
