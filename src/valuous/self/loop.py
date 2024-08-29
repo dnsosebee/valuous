@@ -10,8 +10,8 @@ from pydantic import BaseModel
 from valuous.browsers import bed, clock, gmail
 from valuous.self import sync
 from valuous.self.decorators import trace
-from valuous.self.infer import (InferArgs, Interaction, SuccessInteraction,
-                                infer)
+from valuous.self.infer import (FailureInteraction, InferArgs, Interaction,
+                                SuccessInteraction, infer)
 from valuous.self.shared_data import shared_data
 from valuous.self.tool import Tool, ToolResponse, as_tool
 
@@ -130,14 +130,14 @@ def get_user_message(interactions: list[Interaction]) -> MessageParam:
 
     for interaction in interactions:
         match interaction:
-            case {"is_error": True, "tool_use_id": tool_use_id, "exception": exception}:
+            case FailureInteraction(tool_use_id=tool_use_id, exception=exception):
                 content.append({
                     "type": "tool_result",
                     "tool_use_id": tool_use_id,
                     "content": str(exception),
                     "is_error": True,
                 })
-            case {"is_error": False, "tool_use_id": tool_use_id}:
+            case SuccessInteraction(tool_use_id=tool_use_id):
                 content.append({
                     "type": "tool_result",
                     "tool_use_id": tool_use_id,
