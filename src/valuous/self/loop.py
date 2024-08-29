@@ -91,8 +91,15 @@ def loop():
     first_message = temporal_working_memory[0]
     print("\nfirst_message")
     print(first_message)
-    while first_message["content"][0]["type"] == "tool_result":
-        first_message = first_message["content"].pop(0)
+    print("\nType of first_message:", type(first_message))
+
+    print("Type of first_message['content']:", type(first_message['content']))
+    print("Type of first_message['content'][0]:",
+          type(first_message['content'][0]))
+    print("Keys in first_message['content'][0]:",
+          first_message['content'][0].keys())
+    while first_message['content'][0]['type'] == "tool_result":
+        first_message = first_message['content'].pop(0)
 
     next_tools = []
     for browser in workspace:
@@ -180,3 +187,8 @@ def render_browser_window(browser: Browser) -> dict:
         "data": response["data"],
         "affordances": [as_tool(affordance).name for affordance in response["affordances"]]
     }
+
+
+example = {'role': 'user', 'content':
+           [{'type': 'tool_result', 'tool_use_id': 'toolu_015WSAd2LKNA6Zyp5jua3aZx', 'content': 'Success', 'is_error': False},
+            {'type': 'text', 'text': '[{"type": "browser", "module": "valuous.browsers.clock", "current_query": null, "data": {"current_time": "2024-08-29 09:08:59"}, "affordances": []}, {"type": "browser", "module": "valuous.browsers.gmail", "current_query": null, "data": {"unread_messages": [{"subject": "Re: Test", "snippet": "Bump > On Aug 29, 2024, at 9:07 AM, Daniel Sosebee <dnsosebee@gmail.com> wrote: > > Hi, can you respond just by saying \\u201caffirmative\\u201d, thanks testing your capabilities", "id": "1919eaebc56b18c1"}]}, "affordances": ["view_message_t"]}, {"type": "browser", "module": "valuous.browsers.bed", "current_query": null, "data": {}, "affordances": ["nap_t"]}]'}]}
