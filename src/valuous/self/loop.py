@@ -47,7 +47,7 @@ workspace: list[Browser] = [
 
 last_interactions: list[Interaction] = []
 
-cycle_duration_ms = 100
+cycle_duration_ms = 2000
 
 
 @trace(goal="Complete a single cycle of being.")
