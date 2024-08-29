@@ -100,6 +100,16 @@ def loop():
           first_message['content'][0].keys())
     while first_message['content'][0]['type'] == "tool_result":
         first_message = first_message['content'].pop(0)
+        print("\nfirst_message")
+        print(first_message)
+        print("\nType of first_message:", type(first_message))
+
+        print("Type of first_message['content']:",
+              type(first_message['content']))
+        print("Type of first_message['content'][0]:",
+              type(first_message['content'][0]))
+        print("Keys in first_message['content'][0]:",
+              first_message['content'][0].keys())
 
     next_tools = []
     for browser in workspace:
