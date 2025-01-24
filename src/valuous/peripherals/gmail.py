@@ -1,10 +1,8 @@
-
 from typing import List, Optional
 
 from pydantic import BaseModel
 from simplegmail import Gmail
 from simplegmail.message import Message
-from simplegmail.query import construct_query
 
 _client: Gmail = Gmail(client_secret_file='secrets/gmail_client_secret.json',
                        creds_file='secrets/gmail_token.json', access_type='offline')
@@ -37,13 +35,20 @@ def get_unread_inbox():
 
 
 def get_message(id: str) -> Message:
-    return _client.get_messages(
-        query=construct_query(
-            {
-                "id": id
-            }
-        )
-    )[0]
+    ref = _client.service.users().messages().get(
+        userId='me',
+        id=id
+    ).execute()
+
+    messages = _client._get_messages_from_refs(
+        user_id='me',
+        message_refs=[ref],
+    )
+
+    message = messages[0]
+
+    print(message)
+    return message
 
 
 class SendMessageArgs(BaseModel):

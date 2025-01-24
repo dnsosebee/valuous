@@ -37,6 +37,13 @@ async def test_gmail():
     assert unread_message.sender == "Valuous Test Inbox 1 <valuous+test1@gmail.com>"
     unread_message.mark_as_read()
 
+    get_message_result = gmail.get_message(unread_message.id)
+    assert get_message_result.subject == "Test email 1"
+    assert get_message_result.html == "<body><p>Hi,<br/>How are you?</p></body>"
+    assert get_message_result.plain == "Hi,\nHow are you?"
+    assert get_message_result.sender == "Valuous Test Inbox 1 <valuous+test1@gmail.com>"
+    get_message_result.mark_as_read()
+
     reply = gmail.send_reply(
         original_email=unread_message,
         reply_text="I'm good, thanks!",
