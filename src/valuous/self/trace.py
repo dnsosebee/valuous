@@ -70,6 +70,8 @@ def trace(goal: str = "unknown"):
                 # print_trace(head_trace)
                 print("and root")
                 print_trace(root_trace)
+                print("root equals head")
+                print(root_trace == head_trace)
         return wrapper
     return decorator
 
