@@ -2,7 +2,7 @@ import uuid
 from functools import wraps
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 def trace_to_string(trace: 'Trace'):
@@ -21,7 +21,7 @@ class TraceData(BaseModel):
 
 class Trace(BaseModel):
     data: TraceData
-    children: list['Trace'] = []
+    children: list['Trace'] = Field(default_factory=list)
     active: bool
     parent: Optional['Trace'] = None
 
