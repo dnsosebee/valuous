@@ -1,8 +1,8 @@
 # src/valuous/self/main.py - This is the execution entrypoint to valuous, executed by the environment on startup.
 
 
-from valuous.self.decorators import trace
 from valuous.self.loop import loop
+from valuous.self.trace import trace
 
 
 def setup():
