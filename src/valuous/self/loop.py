@@ -1,6 +1,7 @@
 
 
 import json
+import pprint
 import time
 from typing import List, Type, TypedDict
 
@@ -77,9 +78,9 @@ def loop():
             browser["args"] = browser["response"]["redirect"]["args"]
 
     print("\nworkspace")
-    print(workspace)
+    pprint.pprint(workspace)
     print("\nshared_data")
-    print(shared_data)
+    pprint.pprint(shared_data)
 
     if not shared_data["active"]:
         return
