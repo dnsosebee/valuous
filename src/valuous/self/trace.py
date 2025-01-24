@@ -62,14 +62,14 @@ def trace(goal: str = "unknown"):
             finally:
                 # Clean up: mark as inactive, add to parent's children, restore head
                 head_trace.active = False
-                print("adding to parent")
+                # print("adding to parent")
                 parent.children.append(head_trace)
-                print_trace(parent)
-                print("restoring head")
+                # print_trace(parent)
+                # print("restoring head")
                 head_trace = parent
-                print_trace(head_trace)
-                print("and root")
-                print_trace(root_trace)
+                # print_trace(head_trace)
+                # print("and root")
+                # print_trace(root_trace)
         return wrapper
     return decorator
 
