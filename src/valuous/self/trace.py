@@ -10,7 +10,7 @@ class TraceData(BaseModel):
     module_name: str
     qualified_name: str
     goal: str
-    args: tuple[Any, ...]
+    args: Any
     kwargs: dict
     result: Any
 
