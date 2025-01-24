@@ -20,6 +20,11 @@ def jump_to_head_trace_t() -> ToolResponse:
     active_trace = head_trace
     return explore_trace_t()
 
+    print("head")
+    print_trace(head_trace)
+    print("root")
+    print_trace(root_trace)
+
 
 def explore_trace_t() -> ToolResponse:
     global active_trace
