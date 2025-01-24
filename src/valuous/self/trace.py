@@ -68,8 +68,8 @@ def trace(goal: str = "unknown"):
                 # print("restoring head")
                 head_trace = parent
                 # print_trace(head_trace)
-                # print("and root")
-                # print_trace(root_trace)
+                print("and root")
+                print_trace(root_trace)
         return wrapper
     return decorator
 
