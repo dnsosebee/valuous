@@ -61,7 +61,7 @@ def trace(goal: str = "unknown"):
             finally:
                 # Clean up: mark as inactive, add to parent's children, restore head
                 head_trace.active = False
-                parent.children.append(head_trace)
+                parent.children = parent.children + [head_trace]
                 head_trace = parent
 
         return wrapper
