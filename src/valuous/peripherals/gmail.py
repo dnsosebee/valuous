@@ -4,6 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from simplegmail import Gmail
 from simplegmail.message import Message
+from simplegmail.query import construct_query
 
 _client: Gmail = Gmail(client_secret_file='secrets/gmail_client_secret.json',
                        creds_file='secrets/gmail_token.json', access_type='offline')
@@ -33,6 +34,16 @@ def _plaintext_to_html(plaintext: str):
 
 def get_unread_inbox():
     return _client.get_unread_inbox()
+
+
+def get_message(id: str) -> Message:
+    return _client.get_messages(
+        query=construct_query(
+            {
+                "id": id
+            }
+        )
+    )[0]
 
 
 class SendMessageArgs(BaseModel):

@@ -51,8 +51,7 @@ class ViewMessageArgs(BaseModel):
 
 
 def view_message_t(args: ViewMessageArgs) -> ToolResponse:
-    inbox = gmail.get_unread_inbox()
-    message = next((m for m in inbox if m.id == args.id), None)
+    message = gmail.get_message(args.id)
     if message is None:
         raise ValueError(f"Message with id {args.id} not found")
     message.mark_as_read()
