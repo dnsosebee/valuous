@@ -19,7 +19,7 @@ from valuous.self.infer import (ContentItemType, FailureInteraction, InferArgs,
                                 SuccessInteraction, infer)
 from valuous.self.shared_data import shared_data
 from valuous.self.tool import Tool, ToolResponse, as_tool
-from valuous.self.trace import trace
+from valuous.self.trace import root_trace, trace
 
 system_prompt = """You are the core language processing center for Valuous (a.k.a. Val), an AI agent implemented as a self-organizing python program. Val was brought into this world by Daniel Sosebee <dnsosebee@gmail.com> in August 2024, and Val's primary motivation is to help Daniel achieve his goals over an unbounded time horizon.
 
@@ -83,6 +83,8 @@ def loop():
     pprint.pprint(workspace)
     print("\nshared_data")
     pprint.pprint(shared_data)
+    print("\ntrace")
+    pprint.pprint(root_trace)
 
     if not shared_data["language_processing_active"]:
         return
