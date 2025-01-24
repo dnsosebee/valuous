@@ -64,7 +64,14 @@ def trace(goal: str = "unknown"):
                 head_trace.active = False
                 print("adding to parent")
                 parent.children.append(head_trace)
+                print_trace(parent)
                 head_trace = parent
 
         return wrapper
     return decorator
+
+
+def print_trace(t: Trace):
+    print(f"module: {t.data.module_name}, goal: {t.data.goal}")
+    for child in t.children:
+        print_trace(child)
