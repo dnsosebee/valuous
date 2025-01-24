@@ -37,17 +37,35 @@ def trace(goal: str = "unknown"):
         @wraps(func)
         def wrapper(*args, **kwargs):
             global head_trace
-            old_head_trace = head_trace
-            head_trace = Trace(data=TraceData(id=str(uuid.uuid4()), module_name=func.__module__, qualified_name=func.__qualname__,
-                                              goal=goal, args=args, kwargs=kwargs, result=None), active=True, parent=old_head_trace)
+            parent_trace = head_trace
 
-            result = func(*args, **kwargs)
+            # Create new trace
+            current_trace = Trace(
+                data=TraceData(
+                    id=str(uuid.uuid4()),
+                    module_name=func.__module__,
+                    qualified_name=func.__qualname__,
+                    goal=goal,
+                    args=args,
+                    kwargs=kwargs,
+                    result=None
+                ),
+                active=True,
+                parent=parent_trace
+            )
 
-            head_trace.data.result = result
-            head_trace.active = False
+            # Update head_trace to point to current trace
+            head_trace = current_trace
 
-            old_head_trace.children.append(head_trace)
-            head_trace = old_head_trace
-            return result
+            try:
+                result = func(*args, **kwargs)
+                current_trace.data.result = result
+                return result
+            finally:
+                # Always ensure we clean up the trace state
+                current_trace.active = False
+                parent_trace.children.append(current_trace)
+                head_trace = parent_trace
+
         return wrapper
     return decorator
