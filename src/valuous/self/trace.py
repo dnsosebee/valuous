@@ -37,10 +37,10 @@ def trace(goal: str = "unknown"):
         @wraps(func)
         def wrapper(*args, **kwargs):
             global head_trace
-            parent_trace = head_trace
+            parent = head_trace  # Save the current head
 
-            # Create new trace
-            current_trace = Trace(
+            # Create new trace and make it the head
+            head_trace = Trace(
                 data=TraceData(
                     id=str(uuid.uuid4()),
                     module_name=func.__module__,
@@ -51,21 +51,18 @@ def trace(goal: str = "unknown"):
                     result=None
                 ),
                 active=True,
-                parent=parent_trace
+                parent=parent
             )
-
-            # Update head_trace to point to current trace
-            head_trace = current_trace
 
             try:
                 result = func(*args, **kwargs)
-                current_trace.data.result = result
+                head_trace.data.result = result
                 return result
             finally:
-                # Always ensure we clean up the trace state
-                current_trace.active = False
-                parent_trace.children.append(current_trace)
-                head_trace = parent_trace
+                # Clean up: mark as inactive, add to parent's children, restore head
+                head_trace.active = False
+                parent.children.append(head_trace)
+                head_trace = parent
 
         return wrapper
     return decorator
