@@ -67,7 +67,7 @@ def trace(goal: str = "unknown"):
     return decorator
 
 
-def print_trace(t: Trace):
-    print(f"module: {t.data.module_name}, goal: {t.data.goal}")
+def print_trace(t: Trace, indent: int = 0):
+    print(f"{'  ' * indent}module: {t.data.module_name}, goal: {t.data.goal}")
     for child in t.children:
-        print_trace(child)
+        print_trace(child, indent + 1)
