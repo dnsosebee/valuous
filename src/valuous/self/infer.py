@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from valuous.peripherals.model_providers.anthropic import (
     anthropic, as_anthropic_tool_name, as_anthropic_tools)
 from valuous.self.tool import Tool
+from valuous.self.trace import trace
 
 max_tokens = 1024
 
@@ -33,6 +34,7 @@ class InferArgs(BaseModel):
     }
 
 
+@trace(goal="infer")
 def infer(args: InferArgs):
 
     anthropic_tools = as_anthropic_tools(args.tools)
