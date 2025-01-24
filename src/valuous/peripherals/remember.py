@@ -10,9 +10,9 @@
 # #     ":replace trace_node {uid: String, ts: Validity default 'ASSERT' => record: String, source: String, prev_event: String, parent_event: String,}")
 # # print(type(res))
 
-from valuous.self.decorators import trace
+from valuous.self.trace import trace
 
 
-@trace("remember")
+@trace(goal="remember this message")
 def remember(message: str):
     return message

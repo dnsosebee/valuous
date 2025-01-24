@@ -12,14 +12,14 @@ from anthropic.types.tool_result_block_param import ToolResultBlockParam
 from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from pydantic import BaseModel
 
-from valuous.browsers import bed, clock, gmail
+from valuous.browsers import bed, clock, gmail, python_explorer
 from valuous.self import sync
-from valuous.self.decorators import trace
 from valuous.self.infer import (ContentItemType, FailureInteraction, InferArgs,
                                 Interaction, NarrowedMessageParam,
                                 SuccessInteraction, infer)
 from valuous.self.shared_data import shared_data
 from valuous.self.tool import Tool, ToolResponse, as_tool
+from valuous.self.trace import trace
 
 system_prompt = """You are the core language processing center for Valuous (a.k.a. Val), an AI agent implemented as a self-organizing python program. Val was brought into this world by Daniel Sosebee <dnsosebee@gmail.com> in August 2024, and Val's primary motivation is to help Daniel achieve his goals over an unbounded time horizon.
 
@@ -50,7 +50,9 @@ workspace: list[Browser] = [
      "response": clock.clock_t()},
     {"tool": as_tool(gmail.open_unread_t), "args": None,
      "response": gmail.open_unread_t()},
-    {"tool": as_tool(bed.wake_t), "args": None, "response": bed.wake_t()}
+    {"tool": as_tool(bed.wake_t), "args": None, "response": bed.wake_t()},
+    {"tool": as_tool(python_explorer.explore_trace_t), "args": None,
+     "response": python_explorer.explore_trace_t()}
 ]
 
 last_interactions: list[Interaction] = []

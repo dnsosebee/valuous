@@ -1,6 +1,6 @@
 from valuous.peripherals import git
-from valuous.peripherals.memory import remember
-from valuous.self.decorators import trace
+from valuous.peripherals.remember import remember
+from valuous.self.trace import trace
 
 USER_BRANCH = "user"
 
