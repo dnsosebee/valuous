@@ -54,24 +54,15 @@ def trace(goal: str = "unknown"):
             )
 
             head_trace = new_trace
+            parent.children.append(head_trace)
 
             try:
                 result = func(*args, **kwargs)
                 head_trace.data.result = result
                 return result
             finally:
-                # Clean up: mark as inactive, add to parent's children, restore head
-                head_trace.active = False
-                # print("adding to parent")
-                parent.children.append(head_trace)
-                # print_trace(parent)
-                # print("restoring head")
                 head_trace = parent
-                # print_trace(head_trace)
-                print("and root")
-                print_trace(root_trace)
-                print("root equals head")
-                print(root_trace == head_trace)
+                head_trace.active = False
         return wrapper
     return decorator
 
