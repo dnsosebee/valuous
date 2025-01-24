@@ -65,8 +65,11 @@ def trace(goal: str = "unknown"):
                 print("adding to parent")
                 parent.children.append(head_trace)
                 print_trace(parent)
+                print("restoring head")
                 head_trace = parent
-
+                print_trace(head_trace)
+                print("and root")
+                print_trace(root_trace)
         return wrapper
     return decorator
 
