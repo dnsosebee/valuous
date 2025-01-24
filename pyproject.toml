@@ -22,7 +22,7 @@ google-auth-httplib2 = "^0.2.0"
 google-auth-oauthlib = "^1.2.1"
 openapi-pydantic = "^0.4.1"
 jsonschema = "^4.23.0"
-anthropic = "^0.34.1"
+anthropic = "^0.45.0"
 simplegmail = "^4.1.1"
 
 [tool.poetry.scripts]
