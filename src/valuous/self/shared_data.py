@@ -1,6 +1,6 @@
 
 
 shared_data = {
-    "active": True,
+    "language_processing_active": True,
     "last_cycle_ms": 0,
 }

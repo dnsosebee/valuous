@@ -19,7 +19,7 @@ def open_unread_t() -> ToolResponse:
     unread_count = len(data["unread_messages"])
     affordances = [view_message_t] if unread_count > 0 else []
     if unread_count > 0:
-        shared_data["active"] = True
+        shared_data["language_processing_active"] = True
     return {
         "data": data,
         "affordances": affordances
