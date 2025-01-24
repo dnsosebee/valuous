@@ -8,7 +8,7 @@ from simplegmail.message import Message
 from valuous.peripherals import gmail
 from valuous.self.shared_data import shared_data
 from valuous.self.tool import ToolResponse
-from valuous.self.trace import head_trace, root_trace
+from valuous.self.trace import head_trace, root_trace, trace_to_string
 
 valuous_sender = "Valuous <valuous@gmail.com>"
 
@@ -32,10 +32,10 @@ def explore_trace_t() -> ToolResponse:
     ancestor_trace = active_trace
 
     while ancestor_trace.parent is not None:
-        data["reversed_stack"].append(ancestor_trace.data)
+        data["reversed_stack"].append(trace_to_string(ancestor_trace))
         ancestor_trace = ancestor_trace.parent
 
-    data["reversed_stack"].append(ancestor_trace.data)
+    data["reversed_stack"].append(trace_to_string(ancestor_trace))
 
     return {"data": data, "affordances": [jump_to_head_trace_t]}
 

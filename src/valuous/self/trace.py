@@ -5,6 +5,10 @@ from typing import Any, Optional
 from pydantic import BaseModel
 
 
+def trace_to_string(trace: 'Trace'):
+    return f"{trace.data.module_name}.{trace.data.qualified_name} - {trace.data.goal}"
+
+
 class TraceData(BaseModel):
     id: str
     module_name: str
