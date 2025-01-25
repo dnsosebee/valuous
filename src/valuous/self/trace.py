@@ -26,18 +26,31 @@ class Trace(BaseModel):
     parent: Optional['Trace'] = None
 
 
-root_trace = Trace(data=TraceData(id="root", module_name="root", qualified_name="root",
-                   goal="root", args=(), kwargs={}, result=None), active=True)
+class TraceState:
+    def __init__(self):
+        self.root_trace = Trace(
+            data=TraceData(
+                id="root",
+                module_name="root",
+                qualified_name="root",
+                goal="root",
+                args=(),
+                kwargs={},
+                result=None
+            ),
+            active=True
+        )
+        self.head_trace = self.root_trace
 
-head_trace = root_trace
+
+trace_state = TraceState()
 
 
 def trace(goal: str = "unknown"):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            global head_trace, root_trace
-            parent = head_trace
+            parent = trace_state.head_trace
 
             new_trace = Trace(
                 data=TraceData(
@@ -53,16 +66,16 @@ def trace(goal: str = "unknown"):
                 parent=parent
             )
 
-            head_trace = new_trace
-            parent.children.append(head_trace)
+            trace_state.head_trace = new_trace
+            parent.children.append(trace_state.head_trace)
 
             try:
                 result = func(*args, **kwargs)
-                head_trace.data.result = result
+                trace_state.head_trace.data.result = result
                 return result
             finally:
-                head_trace = parent
-                head_trace.active = False
+                trace_state.head_trace = parent
+                trace_state.head_trace.active = False
         return wrapper
     return decorator
 
