@@ -6,10 +6,11 @@ def get_porcelain_status():
 
 
 def commit_all(message="Auto-commit"):
-    subprocess.run(['git', 'add', '.'],
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run(['git', 'commit', '-m', message],
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    pass
+    # subprocess.run(['git', 'add', '.'],
+    #                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # subprocess.run(['git', 'commit', '-m', message],
+    #                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def fetch_branch(branch_name='user'):

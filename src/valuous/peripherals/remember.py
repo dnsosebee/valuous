@@ -13,6 +13,6 @@
 from valuous.self.trace import trace
 
 
-@trace(goal="remember this message")
+@trace(lambda message: f"saved memory: {message}")
 def remember(message: str):
     return message

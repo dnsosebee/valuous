@@ -7,7 +7,7 @@ def test_trace():
             id="root",
             module_name="root",
             qualified_name="root",
-            goal="root",
+            rendered="root",
             args=(),
             kwargs={},
             result=None
@@ -20,7 +20,7 @@ def test_trace():
             id="child",
             module_name="child",
             qualified_name="child",
-            goal="child",
+            rendered="child",
             args=(),
             kwargs={},
             result=None

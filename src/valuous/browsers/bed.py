@@ -8,7 +8,7 @@ def wake_t() -> ToolResponse:
 
 
 def nap_t() -> ToolResponse:
-    """Sleep until the next notification occurs, for example, a new email."""
+    """Sleep until the next notification occurs, for example, a new email. Use if there's nothing to do."""
     shared_data["language_processing_active"] = False
     response = wake_t()
     response["redirect"] = {"tool": wake_t, "args": None}

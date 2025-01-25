@@ -6,14 +6,14 @@ from pydantic import BaseModel, Field
 
 
 def trace_to_string(trace: 'Trace'):
-    return f"{trace.data.module_name}.{trace.data.qualified_name} - {trace.data.goal}"
+    return f"{trace.data.module_name}.{trace.data.qualified_name} - {trace.data.rendered}"
 
 
 class TraceData(BaseModel):
     id: str
     module_name: str
     qualified_name: str
-    goal: str
+    rendered: str
     args: Any
     kwargs: dict
     result: Any
@@ -33,7 +33,7 @@ class TraceState:
                 id="root",
                 module_name="root",
                 qualified_name="root",
-                goal="root",
+                rendered="root",
                 args=(),
                 kwargs={},
                 result=None
@@ -46,10 +46,22 @@ class TraceState:
 trace_state = TraceState()
 
 
-def trace(goal: str = "unknown"):
+def trace(render=None):
+    """
+    Decorator that traces function execution.
+
+    Args:
+        render: Optional function that takes (*args, **kwargs) and returns a string description
+               of what the function call is trying to achieve. If None, uses the function name.
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
+            # Default render function uses the function name
+            render_fn = render if render else lambda *a, **kw: f"Calling {
+                func.__name__}"
+            description = render_fn(*args, **kwargs)
+
             parent = trace_state.head_trace
 
             new_trace = Trace(
@@ -57,7 +69,7 @@ def trace(goal: str = "unknown"):
                     id=str(uuid.uuid4()),
                     module_name=func.__module__,
                     qualified_name=func.__qualname__,
-                    goal=goal,
+                    rendered=description,  # Using the rendered description instead of static goal
                     args=args,
                     kwargs=kwargs,
                     result=None
@@ -81,6 +93,6 @@ def trace(goal: str = "unknown"):
 
 
 def print_trace(t: Trace, indent: int = 0):
-    print(f"{'  ' * indent}module: {t.data.module_name}, goal: {t.data.goal}")
+    print(f"{'  ' * indent}{trace_to_string(t)}")
     for child in t.children:
         print_trace(child, indent + 1)

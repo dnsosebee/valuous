@@ -5,7 +5,7 @@ from valuous.self.trace import trace
 USER_BRANCH = "user"
 
 
-@trace("keep up with user branch")
+@trace(lambda: "sync with the `user` git branch")
 def sync_git():
     status = git.get_porcelain_status()
     if status:

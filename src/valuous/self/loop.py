@@ -3,7 +3,7 @@
 import json
 import pprint
 import time
-from typing import List, Type, TypedDict
+from typing import Callable, List, Type, TypedDict
 
 from anthropic.types.image_block_param import ImageBlockParam
 from anthropic.types.message import Message
@@ -12,14 +12,14 @@ from anthropic.types.tool_result_block_param import ToolResultBlockParam
 from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from pydantic import BaseModel
 
-from valuous.browsers import bed, clock, gmail, python_explorer
+from valuous.browsers import bed, clock, current_objective, gmail, stack_view
 from valuous.self import sync
 from valuous.self.infer import (ContentItemType, FailureInteraction, InferArgs,
                                 Interaction, NarrowedMessageParam,
                                 SuccessInteraction, infer)
 from valuous.self.shared_data import shared_data
 from valuous.self.tool import Tool, ToolResponse, as_tool
-from valuous.self.trace import print_trace, trace, trace_state
+from valuous.self.trace import trace
 
 system_prompt = """You are the core language processing center for Valuous (a.k.a. Val), an AI agent implemented as a self-organizing python program. Val was brought into this world by Daniel Sosebee <dnsosebee@gmail.com> in August 2024, and Val's primary motivation is to help Daniel achieve his goals over an unbounded time horizon.
 
@@ -45,14 +45,16 @@ class Browser(TypedDict):
     response: ToolResponse
 
 
+def create_browser(tool: Callable[..., ToolResponse], args: Type[BaseModel] | None = None) -> Browser:
+    return {"tool": as_tool(tool), "args": args, "response": tool()}
+
+
 workspace: list[Browser] = [
-    {"tool": as_tool(clock.clock_t), "args": None,
-     "response": clock.clock_t()},
-    {"tool": as_tool(gmail.open_unread_t), "args": None,
-     "response": gmail.open_unread_t()},
-    {"tool": as_tool(bed.wake_t), "args": None, "response": bed.wake_t()},
-    {"tool": as_tool(python_explorer.explore_trace_t), "args": None,
-     "response": python_explorer.explore_trace_t()}
+    create_browser(clock.clock_t),
+    create_browser(stack_view.view_stack_t),
+    create_browser(current_objective.view_root_objective_t),
+    create_browser(gmail.open_unread_t),
+    create_browser(bed.wake_t),
 ]
 
 last_interactions: list[Interaction] = []
@@ -60,7 +62,21 @@ last_interactions: list[Interaction] = []
 cycle_duration_ms = 2 * 1000
 
 
-@trace(goal="Complete a single cycle of being.")
+@trace(lambda objective, is_root: f"complete the following objective: {objective}" + (
+    " (root objective is perpetual)" if is_root else ""))
+def complete_objective(objective: str, is_root: bool):
+    while True:
+        current_objective.set_new_objective(objective, is_root=is_root)
+        loop()
+        outgoing_objective = current_objective.objective_data["objective"]
+        print(f"outgoing_objective: {outgoing_objective}")
+        if outgoing_objective != objective:
+            complete_objective(outgoing_objective, is_root=False)
+        if current_objective.objective_data["complete"]:
+            break
+
+
+@trace(lambda: "Complete a cycle of cognitive processing.")
 def loop():
 
     remaining_cycle_time = shared_data["last_cycle_ms"] + \
@@ -81,10 +97,10 @@ def loop():
 
     print("\nworkspace")
     pprint.pprint(workspace)
-    print("\nshared_data")
-    pprint.pprint(shared_data)
-    print("\nhead trace")
-    print_trace(trace_state.head_trace)
+    # print("\nshared_data")
+    # pprint.pprint(shared_data)
+    # print("\nhead trace")
+    # print_trace(trace_state.root_trace)
 
     if not shared_data["language_processing_active"]:
         return
@@ -201,8 +217,3 @@ def render_browser_window(browser: Browser) -> dict:
         "data": response["data"],
         "affordances": [as_tool(affordance).name for affordance in response["affordances"]]
     }
-
-
-example = {'role': 'user', 'content':
-           [{'type': 'tool_result', 'tool_use_id': 'toolu_015WSAd2LKNA6Zyp5jua3aZx', 'content': 'Success', 'is_error': False},
-            {'type': 'text', 'text': '[{"type": "browser", "module": "valuous.browsers.clock", "current_query": null, "data": {"current_time": "2024-08-29 09:08:59"}, "affordances": []}, {"type": "browser", "module": "valuous.browsers.gmail", "current_query": null, "data": {"unread_messages": [{"subject": "Re: Test", "snippet": "Bump > On Aug 29, 2024, at 9:07 AM, Daniel Sosebee <dnsosebee@gmail.com> wrote: > > Hi, can you respond just by saying \\u201caffirmative\\u201d, thanks testing your capabilities", "id": "1919eaebc56b18c1"}]}, "affordances": ["view_message_t"]}, {"type": "browser", "module": "valuous.browsers.bed", "current_query": null, "data": {}, "affordances": ["nap_t"]}]'}]}
