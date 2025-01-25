@@ -8,22 +8,21 @@ from simplegmail.message import Message
 from valuous.peripherals import gmail
 from valuous.self.shared_data import shared_data
 from valuous.self.tool import ToolResponse
-from valuous.self.trace import head_trace, root_trace, trace_to_string
+from valuous.self.trace import trace_state, trace_to_string
 
 valuous_sender = "Valuous <valuous@gmail.com>"
 
-active_trace = root_trace
+active_trace = trace_state.root_trace
 
 
 def jump_to_head_trace_t() -> ToolResponse:
     global active_trace
-    active_trace = head_trace
+    active_trace = trace_state.head_trace
     return explore_trace_t()
 
 
 def explore_trace_t() -> ToolResponse:
     global active_trace
-    global root_trace
 
     data = {
         "reversed_stack": []
