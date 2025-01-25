@@ -84,7 +84,7 @@ def loop():
     print("\nshared_data")
     pprint.pprint(shared_data)
     print("\nhead trace")
-    # print_trace(head_trace)
+    print_trace(head_trace)
 
     if not shared_data["language_processing_active"]:
         return
