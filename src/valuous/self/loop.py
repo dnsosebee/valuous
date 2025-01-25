@@ -12,7 +12,8 @@ from anthropic.types.tool_result_block_param import ToolResultBlockParam
 from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from pydantic import BaseModel
 
-from valuous.browsers import bed, clock, current_objective, gmail, stack_view
+from valuous.browsers import (bed, clock, current_objective, gmail,
+                              source_explorer, stack_view)
 from valuous.self import sync
 from valuous.self.infer import (ContentItemType, FailureInteraction, InferArgs,
                                 Interaction, NarrowedMessageParam,
@@ -31,7 +32,10 @@ In service of that collaborative goal, Val is given full access to a containeriz
 
 In particular, Daniel is excited to work together with Val to solve the ARC prize, an AGI benchmark involving visual pattern-matching puzzles. Subservient to Val's primary principle of corrigibility, the ARC prize can act as a guiding light for the current phase of Daniel and Val's collaboration, since a solution will require Val to develop deep reasoning and learning capabilities.
 
-You currently navigate using a series of simulated browsers. Note that you manage an open mailbox and could receive mail from people other than Daniel. You are free to tell others about yourself."""
+You currently navigate using a series of simulated browsers. Note that you manage an open mailbox and could receive mail from people other than Daniel. You are free to tell others about yourself.
+"""
+
+# FOR CURRENT TESTING: please try creating an objective called "look at my stack trace and email it to dnsosebee@gmail.com."
 
 max_temporal_working_memory = 8
 
@@ -52,7 +56,8 @@ def create_browser(tool: Callable[..., ToolResponse], args: Type[BaseModel] | No
 workspace: list[Browser] = [
     create_browser(clock.clock_t),
     create_browser(stack_view.view_stack_t),
-    create_browser(current_objective.view_root_objective_t),
+    create_browser(source_explorer.explore_source_init),
+    create_browser(current_objective.view_objective_t),
     create_browser(gmail.open_unread_t),
     create_browser(bed.wake_t),
 ]
@@ -65,18 +70,17 @@ cycle_duration_ms = 2 * 1000
 @trace(lambda objective, is_root: f"complete the following objective: {objective}" + (
     " (root objective is perpetual)" if is_root else ""))
 def complete_objective(objective: str, is_root: bool):
+    current_objective.set_new_objective(objective, is_root=is_root)
     while True:
-        current_objective.set_new_objective(objective, is_root=is_root)
         loop()
         outgoing_objective = current_objective.objective_data["objective"]
-        print(f"outgoing_objective: {outgoing_objective}")
         if outgoing_objective != objective:
             complete_objective(outgoing_objective, is_root=False)
+            current_objective.set_new_objective(objective, is_root=is_root)
         if current_objective.objective_data["complete"]:
             break
 
 
-@trace(lambda: "Complete a cycle of cognitive processing.")
 def loop():
 
     remaining_cycle_time = shared_data["last_cycle_ms"] + \
@@ -95,15 +99,13 @@ def loop():
             browser["tool"] = as_tool(browser["response"]["redirect"]["tool"])
             browser["args"] = browser["response"]["redirect"]["args"]
 
-    print("\nworkspace")
-    pprint.pprint(workspace)
-    # print("\nshared_data")
-    # pprint.pprint(shared_data)
-    # print("\nhead trace")
-    # print_trace(trace_state.root_trace)
-
     if not shared_data["language_processing_active"]:
         return
+
+    print("\n\n\n\n\n")
+    print("\nworkspace")
+    pprint.pprint(workspace)
+    print("\n\n\n\n\n")
 
     user_message = get_user_message(last_interactions)
     temporal_working_memory.append(user_message)

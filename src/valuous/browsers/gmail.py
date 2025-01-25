@@ -71,6 +71,7 @@ class SendReplyArgs(BaseModel):
 
 def get_send_reply_t(original_email: Message, reply_sender: str) -> Callable[[SendReplyArgs], ToolResponse]:
     def send_reply_t(args: SendReplyArgs) -> ToolResponse:
+        """Send a reply to the original email."""
         send_message_args = gmail.send_reply(
             original_email, args.reply_text, reply_sender)
         gmail.send_message(send_message_args)

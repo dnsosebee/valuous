@@ -1,15 +1,14 @@
 from valuous.peripherals import git
 from valuous.peripherals.remember import remember
-from valuous.self.trace import trace
 
 USER_BRANCH = "user"
 
 
-@trace(lambda: "sync with the `user` git branch")
+# @trace(lambda: "sync with the `user` git branch")
 def sync_git():
     status = git.get_porcelain_status()
     if status:
-        remember("Committing local changes.")
+        # remember("Committing local changes.")
         git.commit_all()
     git.fetch_branch(USER_BRANCH)
     git.merge(USER_BRANCH)

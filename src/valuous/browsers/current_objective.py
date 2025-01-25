@@ -1,15 +1,20 @@
 
+from typing import Callable
+
 from pydantic import BaseModel
 
 from valuous.self.tool import ToolResponse
+from valuous.self.trace import trace
 
 objective_data = {
     "objective": None,
     "complete": False,
-    "root": False,
+    "root": True,
 }
 
 
+@trace(lambda objective, is_root: f"set new objective: {objective}" + (
+    " (root objective is perpetual)" if is_root else ""))
 def set_new_objective(objective: str, is_root: bool):
     global objective_data
     objective_data["objective"] = objective
@@ -17,19 +22,14 @@ def set_new_objective(objective: str, is_root: bool):
     objective_data["root"] = is_root
 
 
-def view_root_objective_t() -> ToolResponse:
-    global objective_data
-    return {"data": objective_data, "affordances": [
-        set_new_objective_t,
-    ]}
-
-
 def view_objective_t() -> ToolResponse:
     global objective_data
-    return {"data": objective_data, "affordances": [
+    affordances: list[Callable[..., ToolResponse]] = [
         set_new_objective_t,
-        mark_objective_complete_t
-    ]}
+    ]
+    if not objective_data["root"]:
+        affordances.append(mark_objective_complete_t)
+    return {"data": objective_data, "affordances": affordances}
 
 
 class SetNewObjectiveArgs(BaseModel):
@@ -37,7 +37,7 @@ class SetNewObjectiveArgs(BaseModel):
 
 
 def set_new_objective_t(args: SetNewObjectiveArgs) -> ToolResponse:
-    """Pushes a new objective onto your stack."""
+    """Pushes a new objective onto your stack. Use this if you have a task you'd like to remember as you work towards executing it."""
     set_new_objective(args.objective, False)
     response = view_objective_t()
     response["redirect"] = {"tool": view_objective_t, "args": None}

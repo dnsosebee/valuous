@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 def trace_to_string(trace: 'Trace'):
-    return f"{trace.data.module_name}.{trace.data.qualified_name} - {trace.data.rendered}"
+    return f"<Trace module='{trace.data.module_name}' qualified_name='{trace.data.qualified_name}' rendered='{trace.data.rendered}'>"
 
 
 class TraceData(BaseModel):

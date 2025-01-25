@@ -47,7 +47,6 @@ def get_message(id: str) -> Message:
 
     message = messages[0]
 
-    print(message)
     return message
 
 
