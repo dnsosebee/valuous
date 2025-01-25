@@ -19,7 +19,7 @@ from valuous.self.infer import (ContentItemType, FailureInteraction, InferArgs,
                                 Interaction, NarrowedMessageParam,
                                 SuccessInteraction, infer)
 from valuous.self.shared_data import shared_data
-from valuous.self.system_prompts import system_prompt_simple
+from valuous.self.system_prompts import system_prompt_1
 from valuous.self.tool import Tool, ToolResponse, as_tool
 from valuous.self.trace import trace
 
@@ -117,7 +117,7 @@ def loop():
     infer_args = InferArgs(
         messages=temporal_working_memory,
         tools=next_tools,
-        system=system_prompt_simple
+        system=system_prompt_1
     )
     res = infer(infer_args)
 
